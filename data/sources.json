@@ -1,0 +1,10 @@
+[
+  {
+    "id": 1,
+    "research_id": 1,
+    "author": "Иванов И. И.",
+    "title": "Методы анализа данных",
+    "year": 2022,
+    "url": "https://example.org/articles/data-analysis"
+  }
+]
