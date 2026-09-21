@@ -75,49 +75,52 @@ def main() -> None:
         print(MENU)
         choice = input_nonempty("Выберите действие: ")
 
-        if choice == "1":
-            show_researches(researches)
-        elif choice == "2":
-            research_id = input_int("Идентификатор исследования: ")
-            show_sources(get_research_sources(sources, research_id))
-        elif choice == "3":
-            title = input_nonempty("Название исследования: ")
-            description = input_nonempty("Описание: ")
-            research = add_research(researches, title, description)
-            save_json(RESEARCHES_FILE, researches)
-            print(f"Добавлено исследование #{research['id']}")
-        elif choice == "4":
-            research_id = input_int("Идентификатор исследования: ")
-            if find_research(researches, research_id) is None:
-                print("Исследование с таким идентификатором не найдено")
-                continue
-            author = input_nonempty("Автор: ")
-            title = input_nonempty("Название источника: ")
-            year = input_int("Год публикации: ")
-            url = input_nonempty("Ссылка: ")
-            source = add_source(
-                sources, research_id, author, title, year, url
-            )
-            save_json(SOURCES_FILE, sources)
-            print(f"Добавлен источник #{source['id']}")
-        elif choice == "5":
-            query = input_nonempty("Строка поиска: ")
-            show_sources(find_sources(sources, query))
-        elif choice == "6":
-            source_id = input_int("Идентификатор источника: ")
-            if remove_source(sources, source_id):
+        match choice:
+            case "1":
+                show_researches(researches)
+            case "1":
+                show_researches(researches)
+            case "2":
+                research_id = input_int("Идентификатор исследования: ")
+                show_sources(get_research_sources(sources, research_id))
+            case "3":
+                title = input_nonempty("Название исследования: ")
+                description = input_nonempty("Описание: ")
+                research = add_research(researches, title, description)
+                save_json(RESEARCHES_FILE, researches)
+                print(f"Добавлено исследование #{research['id']}")
+            case "4":
+                research_id = input_int("Идентификатор исследования: ")
+                if find_research(researches, research_id) is None:
+                    print("Исследование с таким идентификатором не найдено")
+                    continue
+                author = input_nonempty("Автор: ")
+                title = input_nonempty("Название источника: ")
+                year = input_int("Год публикации: ")
+                url = input_nonempty("Ссылка: ")
+                source = add_source(
+                    sources, research_id, author, title, year, url
+                )
                 save_json(SOURCES_FILE, sources)
-                print("Источник удалён")
-            else:
-                print("Источник не найден")
-        elif choice == "7":
-            research_id = input_int("Идентификатор исследования: ")
-            show_statistics(get_research_statistics(sources, research_id))
-        elif choice == "0":
-            print("Выход из программы")
-            break
-        else:
-            print("Неизвестный пункт меню")
+                print(f"Добавлен источник #{source['id']}")
+            case "5":
+                query = input_nonempty("Строка поиска: ")
+                show_sources(find_sources(sources, query))
+            case "6":
+                source_id = input_int("Идентификатор источника: ")
+                if remove_source(sources, source_id):
+                    save_json(SOURCES_FILE, sources)
+                    print("Источник удалён")
+                else:
+                    print("Источник не найден")
+            case "7":
+                research_id = input_int("Идентификатор исследования: ")
+                show_statistics(get_research_statistics(sources, research_id))
+            case "0":
+                print("Выход из программы")
+                break
+            case _:
+                print("Неизвестный пункт меню")
 
 
 if __name__ == "__main__":
