@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Удаление источника{% endblock %}
+
+{% block content %}
+    <h1>Удалить источник?</h1>
+    <p>{{ source.format_citation }}</p>
+    <p class="text-muted">Удаление нельзя отменить. Если источник просто не подходит, его можно исключить.</p>
+    <form method="post">
+        {% csrf_token %}
+        <button class="btn btn-danger">Удалить</button>
+        <a href="{{ source.get_absolute_url }}" class="btn btn-outline-secondary">Отмена</a>
+    </form>
+{% endblock %}

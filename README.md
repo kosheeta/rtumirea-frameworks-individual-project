@@ -208,6 +208,41 @@ python db/import_sqlite_to_orm.py
 `db/import_json.py`, `data/sources.sqlite`) оставлена в проекте как
 этап ПР7.
 
+## Формы (ПР11)
+
+- `sources.forms.SourceFilterForm` (`forms.Form`) — фильтр списка
+  источников по GET-параметрам: исследование, пользователь, статус,
+  диапазон лет, «без устаревших», сортировка. Проверки: год не в будущем
+  (`clean_year_to`), начальный год не больше конечного (`clean`).
+- `sources.forms.SourceForm` (`ModelForm`) — создание и редактирование
+  источника. Валидаторы в `sources/validators.py` (год от 1450 до
+  текущего, у автора есть фамилия и нет цифр), `clean_title()` убирает
+  лишние пробелы, `clean()` запрещает добавить один и тот же источник
+  в исследование дважды (без учёта регистра, текущий объект при
+  редактировании не считается дубликатом).
+- `researches.forms.ResearchForm` (`ModelForm`) — создание и
+  редактирование исследования с загрузкой обложки (`ImageField`,
+  до 2 МБ, файлы в `media/researches/`).
+
+Страницы:
+
+- `/sources/create/` — новый источник (из исследования поля исследования
+  и пользователя заполняются заранее);
+- `/sources/<id>/edit/` — редактирование;
+- `/sources/<id>/exclude/` — исключить или вернуть источник (только POST);
+- `/sources/<id>/delete/` — подтверждение и удаление (POST);
+- `/researches/create/`, `/researches/<slug>/edit/` — исследование.
+
+Все POST-формы содержат `{% csrf_token %}`, данные сохраняются только
+после `is_valid()`, после сохранения выполняется redirect и выводится
+сообщение (`django.contrib.messages`). Отсутствующий объект — 404
+(`get_object_or_404`). Поля формы выводятся общим шаблоном
+`templates/includes/form_fields.html` с подписями, подсказками и
+ошибками, оформление Bootstrap задаётся в `__init__` форм.
+
+Загруженные файлы хранятся в `MEDIA_ROOT = media/` (в Git не попадают),
+в режиме разработки раздаются по `MEDIA_URL = /media/`. Нужен Pillow.
+
 ## Административная панель
 
 Адрес: http://127.0.0.1:8000/admin/. Суперпользователь создаётся
@@ -287,7 +322,7 @@ python manage.py createsuperuser
 - pytest;
 - flake8;
 - Django 5.2;
-- pytest-django, django-debug-toolbar.
+- pytest-django, django-debug-toolbar, Pillow.
 
 Установка зависимостей:
 

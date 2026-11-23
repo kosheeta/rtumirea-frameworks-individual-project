@@ -23,7 +23,17 @@
             <p class="card-text"><strong>Библиографическая запись:</strong>
                 {{ source.format_citation }}
             </p>
-            <a href="{% url 'sources:list' %}" class="btn btn-outline-secondary">← к источникам</a>
+            <div class="d-flex gap-2">
+                <a href="{% url 'sources:list' %}" class="btn btn-outline-secondary">← к источникам</a>
+                <a href="{% url 'sources:edit' source.id %}" class="btn btn-primary">Редактировать</a>
+                <form method="post" action="{% url 'sources:exclude' source.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-outline-warning">
+                        {% if source.status == "excluded" %}Вернуть в исследование{% else %}Исключить{% endif %}
+                    </button>
+                </form>
+                <a href="{% url 'sources:delete' source.id %}" class="btn btn-outline-danger">Удалить</a>
+            </div>
         </div>
     </div>
 {% endblock %}

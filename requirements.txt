@@ -3,3 +3,4 @@ flake8>=7.0
 Django==5.2.*
 pytest-django>=4.9
 django-debug-toolbar>=6.0
+Pillow>=11.0

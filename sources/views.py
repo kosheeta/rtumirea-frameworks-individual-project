@@ -1,12 +1,15 @@
+from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.views.decorators.http import require_POST
 
 from homepage.views import not_found
-from researches.models import Research
-from users.models import User
 
+from researches.models import Research
+
+from .forms import SourceFilterForm, SourceForm
 from .models import Source
 
 SORT_FIELDS = {
@@ -18,48 +21,37 @@ SORT_FIELDS = {
 
 
 def sources_list(request):
-    research_id = request.GET.get("research", "").strip()
-    user_id = request.GET.get("user", "").strip()
-    min_year = request.GET.get("year", "").strip()
-    only_fresh = request.GET.get("fresh") == "1"
-    status = request.GET.get("status", "").strip()
-    sort = request.GET.get("sort", "new")
-    error = None
-
+    form = SourceFilterForm(request.GET or None)
     sources = Source.objects.with_related()
-    if status in Source.Status.values:
-        sources = sources.filter(status=status)
-    if research_id.isdigit():
-        sources = sources.filter(research_id=int(research_id))
-    if user_id.isdigit():
-        sources = sources.filter(user_id=int(user_id))
-    if min_year:
-        if min_year.isdigit():
-            sources = sources.filter(year__gte=int(min_year))
-        else:
-            error = "Год должен быть числом"
-    if only_fresh:
-        # убираем устаревшие источники (старше 7 лет)
-        sources = sources.fresh()
-    sources = sources.order_by(*SORT_FIELDS.get(sort, SORT_FIELDS["new"]))
+    sort = "new"
+    if form.is_valid():
+        data = form.cleaned_data
+        if data["research"]:
+            sources = sources.filter(research=data["research"])
+        if data["user"]:
+            sources = sources.filter(user=data["user"])
+        if data["status"]:
+            sources = sources.filter(status=data["status"])
+        if data["year_from"]:
+            sources = sources.filter(year__gte=data["year_from"])
+        if data["year_to"]:
+            sources = sources.filter(year__lte=data["year_to"])
+        if data["fresh"]:
+            sources = sources.fresh()
+        sort = data["sort"] or "new"
+    elif form.is_bound:
+        # при ошибках в форме показываем пустой список, а не всё подряд
+        sources = sources.none()
+    sources = sources.order_by(*SORT_FIELDS[sort])
 
     page_obj = Paginator(sources, 5).get_page(request.GET.get("page"))
     params = request.GET.copy()
     params.pop("page", None)
     context = {
+        "form": form,
         "page_obj": page_obj,
         "sources": page_obj.object_list,
         "total": sources.count(),
-        "researches": Research.objects.order_by("title"),
-        "users": User.objects.order_by("name"),
-        "selected_research": research_id,
-        "selected_user": user_id,
-        "min_year": min_year,
-        "only_fresh": only_fresh,
-        "sort": sort,
-        "statuses": Source.Status.choices,
-        "selected_status": status,
-        "error": error,
         "query_string": params.urlencode(),
     }
     return render(request, "sources/source_list.html", context)
@@ -99,3 +91,56 @@ def source_detail(request, source_id):
             reverse("sources:list"), "к источникам",
         )
     return render(request, "sources/source_detail.html", {"source": source})
+
+
+def source_create(request):
+    initial = {}
+    research_slug = request.GET.get("research")
+    if research_slug:
+        research = Research.objects.filter(slug=research_slug).first()
+        if research:
+            initial = {"research": research, "user": research.user}
+    form = SourceForm(request.POST or None, initial=initial)
+    if form.is_valid():
+        source = form.save()
+        messages.success(request, f"Источник «{source.title}» добавлен")
+        return redirect(source.get_absolute_url())
+    context = {"form": form, "title": "Новый источник"}
+    return render(request, "sources/source_form.html", context)
+
+
+def source_edit(request, source_id):
+    source = get_object_or_404(Source, pk=source_id)
+    form = SourceForm(request.POST or None, instance=source)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Изменения сохранены")
+        return redirect(source.get_absolute_url())
+    context = {"form": form, "title": "Редактирование источника",
+               "source": source}
+    return render(request, "sources/source_form.html", context)
+
+
+@require_POST
+def source_exclude(request, source_id):
+    source = get_object_or_404(Source, pk=source_id)
+    if source.status == Source.Status.EXCLUDED:
+        source.status = Source.Status.NEW
+        messages.info(request, "Источник возвращён в исследование")
+    else:
+        source.status = Source.Status.EXCLUDED
+        messages.warning(request, "Источник исключён из исследования")
+    source.save(update_fields=["status"])
+    return redirect(source.get_absolute_url())
+
+
+def source_delete(request, source_id):
+    source = get_object_or_404(Source, pk=source_id)
+    if request.method == "POST":
+        research = source.research
+        source.delete()
+        messages.success(request, "Источник удалён")
+        return redirect(research.get_absolute_url())
+    return render(
+        request, "sources/source_confirm_delete.html", {"source": source}
+    )

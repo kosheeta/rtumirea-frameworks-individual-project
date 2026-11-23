@@ -3,7 +3,16 @@
 {% block title %}{{ research.title }}{% endblock %}
 
 {% block content %}
-    <h1>{{ research.title }}</h1>
+    {% if research.cover %}
+        <img src="{{ research.cover.url }}" alt="{{ research.title }}" class="research-cover mb-3">
+    {% endif %}
+    <div class="d-flex justify-content-between align-items-start">
+        <h1>{{ research.title }}</h1>
+        <div>
+            <a href="{% url 'researches:edit' research.slug %}" class="btn btn-outline-primary">Редактировать</a>
+            <a href="{% url 'sources:create' %}?research={{ research.slug }}" class="btn btn-primary">Добавить источник</a>
+        </div>
+    </div>
     <p class="lead">{{ research.description }}</p>
     <p>Автор: <a href="{% url 'users:detail' research.user.id %}">{{ research.user.name }}</a></p>
     {% if stats.count %}

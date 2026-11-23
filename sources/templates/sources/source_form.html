@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <h1>{{ title }}</h1>
+    <form method="post" class="col-lg-8" novalidate>
+        {% csrf_token %}
+        {% include "includes/form_fields.html" %}
+        <button class="btn btn-primary">Сохранить</button>
+        {% if source %}
+            <a href="{{ source.get_absolute_url }}" class="btn btn-outline-secondary">Отмена</a>
+        {% else %}
+            <a href="{% url 'sources:list' %}" class="btn btn-outline-secondary">Отмена</a>
+        {% endif %}
+    </form>
+{% endblock %}

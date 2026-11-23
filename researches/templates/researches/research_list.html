@@ -3,7 +3,10 @@
 {% block title %}Исследования{% endblock %}
 
 {% block content %}
-    <h1>Исследования</h1>
+    <div class="d-flex justify-content-between align-items-center">
+        <h1>Исследования</h1>
+        <a href="{% url 'researches:create' %}" class="btn btn-primary">Новое исследование</a>
+    </div>
     <form method="get" class="row g-2 mb-3">
         <div class="col-md-5">
             <input name="q" value="{{ query }}" class="form-control" placeholder="Поиск по названию">

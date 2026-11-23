@@ -57,10 +57,10 @@ def test_pages(client, data):
 
 def test_sources_filter_and_sort(client, data):
     """Фильтр по году и некорректный параметр не ломают страницу"""
-    response = client.get(reverse("sources:list"), {"year": "2020"})
+    response = client.get(reverse("sources:list"), {"year_from": "2020"})
     assert response.context["total"] == 1
-    response = client.get(reverse("sources:list"), {"year": "abc"})
-    assert response.context["error"]
+    response = client.get(reverse("sources:list"), {"year_from": "abc"})
+    assert response.context["form"].errors
     response = client.get(reverse("sources:list"), {"sort": "bad"})
     assert response.status_code == 200
 

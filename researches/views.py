@@ -1,10 +1,12 @@
+from django.contrib import messages
 from django.db.models import Avg, Count, Max, Min
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 from homepage.views import not_found
 from users.models import User
 
+from .forms import ResearchForm
 from .models import Research
 
 SORT_FIELDS = {
@@ -58,3 +60,27 @@ def research_detail(request, slug):
     stats["outdated_count"] = relevances.count("устаревший")
     context = {"research": research, "sources": sources, "stats": stats}
     return render(request, "researches/research_detail.html", context)
+
+
+def research_create(request):
+    form = ResearchForm(request.POST or None, request.FILES or None)
+    if form.is_valid():
+        research = form.save()
+        messages.success(request, "Исследование создано")
+        return redirect(research.get_absolute_url())
+    context = {"form": form, "title": "Новое исследование"}
+    return render(request, "researches/research_form.html", context)
+
+
+def research_edit(request, slug):
+    research = get_object_or_404(Research, slug=slug)
+    form = ResearchForm(
+        request.POST or None, request.FILES or None, instance=research
+    )
+    if form.is_valid():
+        research = form.save()
+        messages.success(request, "Изменения сохранены")
+        return redirect(research.get_absolute_url())
+    context = {"form": form, "title": "Редактирование исследования",
+               "research": research}
+    return render(request, "researches/research_form.html", context)

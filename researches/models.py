@@ -22,6 +22,12 @@ class Research(models.Model):
         help_text="Латиницей, если не заполнить — создаётся из названия",
     )
     description = models.TextField(blank=True, verbose_name="Описание")
+    cover = models.ImageField(
+        upload_to="researches/",
+        blank=True,
+        verbose_name="Обложка",
+        help_text="Картинка для страницы исследования, необязательно",
+    )
 
     def belongs_to(self, user):
         return self.user_id == user.id
