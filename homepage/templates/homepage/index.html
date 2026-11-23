@@ -1,6 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}Главная – Сервис учёта источников{% endblock %}
+{% block title %}Главная – Сервис учёта источников    <h4 class="mt-4">Последние источники</h4>
+    <ul class="list-group">
+        {% for source in latest %}
+            {% include "sources/includes/source_item.html" %}
+        {% empty %}
+            <li class="list-group-item">Источников пока нет</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
 
 {% block content %}
     <h1 class="display-5">Сервис учёта использованных источников</h1>
@@ -16,4 +24,12 @@
     <a href="{% url 'sources:list' %}" class="btn btn-secondary me-2">Источники</a>
     <a href="{% url 'users:list' %}" class="btn btn-outline-secondary me-2">Пользователи</a>
     <a href="{% url 'homepage:statistics' %}" class="btn btn-outline-primary">Статистика</a>
+    <h4 class="mt-4">Последние источники</h4>
+    <ul class="list-group">
+        {% for source in latest %}
+            {% include "sources/includes/source_item.html" %}
+        {% empty %}
+            <li class="list-group-item">Источников пока нет</li>
+        {% endfor %}
+    </ul>
 {% endblock %}

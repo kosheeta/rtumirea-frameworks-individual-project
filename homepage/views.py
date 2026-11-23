@@ -1,6 +1,11 @@
+from datetime import date
+
+from django.db.models import Avg, Case, Count, Max, Min, Value, When
 from django.shortcuts import render
 
-from db.database import RELEVANCE, fetch_all, fetch_one
+from researches.models import Research
+from sources.models import Source
+from users.models import User
 
 
 def not_found(request, title, back_url, back_text):
@@ -9,51 +14,46 @@ def not_found(request, title, back_url, back_text):
 
 
 def index(request):
-    counts = fetch_one("""
-        SELECT
-            (SELECT COUNT(*) FROM users) AS users_count,
-            (SELECT COUNT(*) FROM researches) AS researches_count,
-            (SELECT COUNT(*) FROM sources) AS sources_count
-    """)
-    return render(request, "homepage/index.html", {"counts": counts})
+    counts = {
+        "users_count": User.objects.count(),
+        "researches_count": Research.objects.count(),
+        "sources_count": Source.objects.count(),
+    }
+    latest = Source.objects.select_related("research")[:3]
+    return render(
+        request, "homepage/index.html", {"counts": counts, "latest": latest}
+    )
 
 
 def statistics(request):
-    totals = fetch_one("""
-        SELECT
-            COUNT(*) AS sources_count,
-            ROUND(AVG(year), 1) AS average_year,
-            MIN(year) AS oldest_year,
-            MAX(year) AS newest_year
-        FROM sources
-    """)
-    by_research = fetch_all("""
-        SELECT
-            researches.id,
-            researches.title,
-            COUNT(sources.id) AS sources_count,
-            ROUND(AVG(sources.year), 1) AS average_year
-        FROM researches
-        LEFT JOIN sources ON sources.research_id = researches.id
-        GROUP BY researches.id
-        ORDER BY sources_count DESC
-    """)
-    by_relevance = fetch_all(f"""
-        SELECT {RELEVANCE} AS relevance, COUNT(*) AS sources_count
-        FROM sources
-        GROUP BY relevance
-        ORDER BY sources_count DESC
-    """)
-    old_researches = fetch_all("""
-        SELECT
-            researches.id,
-            researches.title,
-            ROUND(AVG(sources.year), 1) AS average_year
-        FROM researches
-        JOIN sources ON sources.research_id = researches.id
-        GROUP BY researches.id
-        HAVING AVG(sources.year) < ?
-    """, (2020,))
+    year = date.today().year
+    totals = Source.objects.aggregate(
+        sources_count=Count("id"),
+        average_year=Avg("year"),
+        oldest_year=Min("year"),
+        newest_year=Max("year"),
+    )
+    by_research = Research.objects.annotate(
+        sources_count=Count("sources"),
+        average_year=Avg("sources__year"),
+    ).order_by("-sources_count", "title")
+    by_relevance = (
+        Source.objects.annotate(
+            relevance=Case(
+                When(year__gte=year - 3, then=Value("актуальный")),
+                When(year__gte=year - 7, then=Value("требует проверки")),
+                default=Value("устаревший"),
+            )
+        )
+        .values("relevance")
+        .annotate(sources_count=Count("id"))
+        .order_by("-sources_count")
+    )
+    old_researches = (
+        Research.objects.annotate(average_year=Avg("sources__year"))
+        .filter(average_year__lt=2020)
+        .order_by("average_year")
+    )
     context = {
         "totals": totals,
         "by_research": by_research,

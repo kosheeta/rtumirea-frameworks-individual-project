@@ -151,45 +151,62 @@ View-функции готовят контекст и вызывают `render(
 (собственные стили карточек и бейджей), `js/main.js` (фильтр списка на
 странице без перезагрузки), `img/logo.svg` (логотип).
 
-## База данных
+## База данных и Django ORM
 
-Веб-часть получает данные из базы SQLite `data/sources.sqlite` через
-модуль `sqlite3`. JSON-файлы остаются источником данных для консольной
-версии и для первичного переноса в базу.
+Веб-часть работает с базой через Django ORM. Модели:
 
-Таблицы (`sql/schema.sql`):
+- `users.models.User` — `name`, `email` (уникальный);
+- `researches.models.Research` — `user` (FK на `User`,
+  `related_name="researches"`, `PROTECT`), `title`, `description`;
+- `sources.models.Source` — `research` (FK на `Research`,
+  `related_name="sources"`, `CASCADE`), `user` (FK на `User`,
+  `related_name="sources"`, `PROTECT`), `author`, `title`, `year`, `url`;
+  методы `get_age()`, `get_relevance()`, `format_citation()`.
 
-- `users` — `id` (PK), `name`, `email` (UNIQUE);
-- `researches` — `id` (PK), `user_id` (FK → `users.id`), `title`,
-  `description`;
-- `sources` — `id` (PK), `research_id` (FK → `researches.id`),
-  `user_id` (FK → `users.id`), `author`, `title`, `year`, `url`.
-
-Связи: у пользователя много исследований, у исследования много
-источников, источник добавляется конкретным пользователем.
-
-Файлы:
-
-- `sql/schema.sql` — создание таблиц;
-- `sql/queries.sql` — 13 запросов проекта (списки, WHERE, JOIN,
-  агрегаты, GROUP BY, HAVING) с комментариями;
-- `db/database.py` — подключение (`PRAGMA foreign_keys = ON`),
-  выполнение запросов с `sqlite3.Row`;
-- `db/import_json.py` — перенос данных из JSON в базу (`executemany`).
-
-Пересоздать базу из JSON:
+Таблицы создаются миграциями (`*/migrations/0001_initial.py`):
 
 ```
-python -m db.import_json
+python manage.py migrate
 ```
 
-Проверить запросы:
+Данные переносятся из базы ПР7 `data/sources.sqlite` в базу Django
+`db.sqlite3` (стратегия: новые таблицы Django + перенос данных с
+сохранением id и связей):
 
 ```
-sqlite3 data/sources.sqlite < sql/queries.sql
+python db/inspect_source_db.py
+python db/import_sqlite_to_orm.py
 ```
 
-Значения в запросы из веб-форм передаются только через параметры `?`.
+Скрипт можно запускать повторно — используется `update_or_create()`.
+
+Операции ORM в представлениях:
+
+- списки и получение по id: `select_related()`, `get()`,
+  `filter(pk=...).first()`;
+- фильтрация: по исследованию и пользователю (`research_id`, `user_id`),
+  по году (`year__gte`), исключение устаревших (`exclude(year__lt=...)`);
+- поиск: `Q(title__icontains) | Q(author__icontains)`,
+  `author__istartswith`, `title__icontains` для исследований;
+- сортировка через словарь разрешённых полей, в том числе по полям
+  связанных моделей (`research__title`, `user__name`);
+- обратные связи: `research.sources`, `user.researches`, `user.sources`;
+- агрегирование: `aggregate(Count, Avg, Min, Max)`, `annotate(Count(...))`,
+  группировка по актуальности через `Case/When` + `values().annotate()`,
+  условие на группу `annotate(Avg).filter(...)`;
+- постраничный вывод списка источников (`Paginator`, по 5 на странице).
+
+Списки исследований и источников принимают GET-параметры (`q`, `user`,
+`research`, `year`, `fresh`, `sort`, `page`), некорректные значения
+не приводят к ошибке.
+
+В SQLite `LIKE` не учитывает регистр кириллицы, поэтому в
+`homepage/sqlite_like.py` для соединения регистрируется своя функция
+`like`.
+
+Предыдущая реализация на `sqlite3` (`sql/`, `db/database.py`,
+`db/import_json.py`, `data/sources.sqlite`) оставлена в проекте как
+этап ПР7.
 
 ## Структура проекта
 
@@ -207,7 +224,9 @@ sqlite3 data/sources.sqlite < sql/queries.sql
 - `models/sources.py` — класс `Source`, функции работы с источниками
   и статистика;
 - `storage.py` — загрузка JSON в объекты и сохранение объектов в JSON;
-- `db/`, `sql/` — работа с базой SQLite;
+- `users/models.py`, `researches/models.py`, `sources/models.py` —
+  модели Django;
+- `db/`, `sql/` — база ПР7 и скрипты переноса данных в ORM;
 - `utils.py` — вспомогательные функции безопасного ввода;
 - `data/` — JSON-файлы данных (`users.json`, `researches.json`,
   `sources.json`);
@@ -230,6 +249,8 @@ pip install -r requirements.txt
 ## Запуск веб-приложения
 
 ```
+python manage.py migrate
+python db/import_sqlite_to_orm.py
 python manage.py runserver
 ```
 

@@ -1,63 +1,92 @@
+from django.core.paginator import Paginator
+from django.db.models import Q
 from django.shortcuts import render
 from django.urls import reverse
 
-from db.database import AGE, RELEVANCE, fetch_all, fetch_one
 from homepage.views import not_found
+from researches.models import Research
+from users.models import User
 
-SOURCE_FIELDS = f"""
-    sources.id,
-    sources.author,
-    sources.title,
-    sources.year,
-    sources.url,
-    sources.research_id,
-    sources.user_id,
-    researches.title AS research_title,
-    users.name AS user_name,
-    {AGE} AS age,
-    {RELEVANCE} AS relevance
-FROM sources
-JOIN researches ON sources.research_id = researches.id
-JOIN users ON sources.user_id = users.id
-"""
+from .models import Source
+
+SORT_FIELDS = {
+    "new": ("-year", "title"),
+    "old": ("year", "title"),
+    "author": ("author", "title"),
+    "research": ("research__title", "-year"),
+}
 
 
 def sources_list(request):
-    sources = fetch_all(
-        f"SELECT {SOURCE_FIELDS} ORDER BY sources.year DESC, sources.title"
-    )
-    return render(request, "sources/source_list.html", {"sources": sources})
+    research_id = request.GET.get("research", "").strip()
+    user_id = request.GET.get("user", "").strip()
+    min_year = request.GET.get("year", "").strip()
+    only_fresh = request.GET.get("fresh") == "1"
+    sort = request.GET.get("sort", "new")
+    error = None
+
+    sources = Source.objects.select_related("research", "user")
+    if research_id.isdigit():
+        sources = sources.filter(research_id=int(research_id))
+    if user_id.isdigit():
+        sources = sources.filter(user_id=int(user_id))
+    if min_year:
+        if min_year.isdigit():
+            sources = sources.filter(year__gte=int(min_year))
+        else:
+            error = "Год должен быть числом"
+    if only_fresh:
+        # убираем устаревшие источники (старше 7 лет)
+        sources = sources.exclude(year__lt=Source.fresh_border_year())
+    sources = sources.order_by(*SORT_FIELDS.get(sort, SORT_FIELDS["new"]))
+
+    page_obj = Paginator(sources, 5).get_page(request.GET.get("page"))
+    params = request.GET.copy()
+    params.pop("page", None)
+    context = {
+        "page_obj": page_obj,
+        "sources": page_obj.object_list,
+        "total": sources.count(),
+        "researches": Research.objects.order_by("title"),
+        "users": User.objects.order_by("name"),
+        "selected_research": research_id,
+        "selected_user": user_id,
+        "min_year": min_year,
+        "only_fresh": only_fresh,
+        "sort": sort,
+        "error": error,
+        "query_string": params.urlencode(),
+    }
+    return render(request, "sources/source_list.html", context)
 
 
 def sources_search(request):
     query = request.GET.get("q", "").strip()
-    min_year = request.GET.get("year", "").strip()
-    sources = []
-    searched = bool(query or min_year)
-    if searched:
-        year = int(min_year) if min_year.isdigit() else 0
-        sources = fetch_all(
-            f"""
-            SELECT {SOURCE_FIELDS}
-            WHERE (py_lower(sources.title) LIKE ?
-                OR py_lower(sources.author) LIKE ?)
-            AND sources.year >= ?
-            ORDER BY sources.year DESC
-            """,
-            (f"%{query.lower()}%", f"%{query.lower()}%", year),
+    author_start = request.GET.get("author", "").strip()
+    sources = Source.objects.none()
+    searched = bool(query or author_start)
+    if query:
+        sources = Source.objects.filter(
+            Q(title__icontains=query) | Q(author__icontains=query)
         )
+    if author_start:
+        found = Source.objects.filter(author__istartswith=author_start)
+        sources = sources & found if query else found
+    sources = sources.select_related("research", "user")
     context = {
         "sources": sources,
         "query": query,
-        "min_year": min_year,
+        "author": author_start,
         "searched": searched,
     }
     return render(request, "sources/source_search.html", context)
 
 
 def source_detail(request, source_id):
-    source = fetch_one(
-        f"SELECT {SOURCE_FIELDS} WHERE sources.id = ?", (source_id,)
+    source = (
+        Source.objects.select_related("research", "user")
+        .filter(pk=source_id)
+        .first()
     )
     if source is None:
         return not_found(

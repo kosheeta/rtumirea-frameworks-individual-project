@@ -4,12 +4,32 @@
 
 {% block content %}
     <h1>Исследования</h1>
-    <input id="list-filter" class="form-control mb-3" placeholder="Фильтр по названию">
+    <form method="get" class="row g-2 mb-3">
+        <div class="col-md-5">
+            <input name="q" value="{{ query }}" class="form-control" placeholder="Поиск по названию">
+        </div>
+        <div class="col-md-3">
+            <select name="user" class="form-select">
+                <option value="">Все владельцы</option>
+                {% for user in users %}
+                    <option value="{{ user.pk }}" {% if selected_user == user.pk|stringformat:"s" %}selected{% endif %}>{{ user.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="sort" class="form-select">
+                <option value="title" {% if sort == "title" %}selected{% endif %}>По названию</option>
+                <option value="user" {% if sort == "user" %}selected{% endif %}>По владельцу</option>
+                <option value="count" {% if sort == "count" %}selected{% endif %}>По числу источников</option>
+            </select>
+        </div>
+        <div class="col-md-2"><button class="btn btn-primary w-100">Показать</button></div>
+    </form>
     <div class="row">
         {% for research in researches %}
             {% include "researches/includes/research_card.html" %}
         {% empty %}
-            <p>Исследований пока нет</p>
+            <p>Исследований не найдено</p>
         {% endfor %}
     </div>
 {% endblock %}

@@ -6,7 +6,7 @@
     <h1>Статистика</h1>
     <div class="row mb-4">
         <div class="col-md-3"><div class="stat-card">Источников: <b>{{ totals.sources_count }}</b></div></div>
-        <div class="col-md-3"><div class="stat-card">Средний год: <b>{{ totals.average_year|default:"—" }}</b></div></div>
+        <div class="col-md-3"><div class="stat-card">Средний год: <b>{{ totals.average_year|floatformat:1|default:"—" }}</b></div></div>
         <div class="col-md-3"><div class="stat-card">Самый старый: <b>{{ totals.oldest_year|default:"—" }}</b></div></div>
         <div class="col-md-3"><div class="stat-card">Самый новый: <b>{{ totals.newest_year|default:"—" }}</b></div></div>
     </div>
@@ -19,7 +19,7 @@
                 <tr>
                     <td><a href="{% url 'researches:detail' row.id %}">{{ row.title }}</a></td>
                     <td>{{ row.sources_count }}</td>
-                    <td>{{ row.average_year|default:"—" }}</td>
+                    <td>{{ row.average_year|floatformat:1|default:"—" }}</td>
                 </tr>
             {% endfor %}
         </tbody>
@@ -41,7 +41,7 @@
     <ul class="list-group">
         {% for row in old_researches %}
             <li class="list-group-item">
-                <a href="{% url 'researches:detail' row.id %}">{{ row.title }}</a> — {{ row.average_year }}
+                <a href="{% url 'researches:detail' row.id %}">{{ row.title }}</a> — {{ row.average_year|floatformat:1 }}
             </li>
         {% empty %}
             <li class="list-group-item">Таких исследований нет</li>

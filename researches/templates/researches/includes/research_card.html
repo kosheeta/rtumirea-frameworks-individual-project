@@ -5,7 +5,7 @@
                 <a href="{% url 'researches:detail' research.id %}">{{ research.title }}</a>
             </h5>
             <p class="card-text">{{ research.description|truncatewords:12 }}</p>
-            <p class="card-text text-muted small">{{ research.user_name }} · источников: {{ research.sources_count }}</p>
+            <p class="card-text text-muted small">{{ research.user.name }} · источников: {{ research.sources_count }}</p>
         </div>
     </div>
 </div>

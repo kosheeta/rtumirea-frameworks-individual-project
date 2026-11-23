@@ -7,13 +7,57 @@
         <h1>Источники</h1>
         <a href="{% url 'sources:search' %}" class="btn btn-outline-primary">Поиск источников</a>
     </div>
-    <p class="text-muted">Всего: {{ sources|length }}</p>
-    <input id="list-filter" class="form-control mb-3" placeholder="Фильтр по автору или названию">
-    <ul class="list-group">
+    <form method="get" class="row g-2 align-items-end mb-3">
+        <div class="col-md-3">
+            <label class="form-label" for="research">Исследование</label>
+            <select id="research" name="research" class="form-select">
+                <option value="">Все</option>
+                {% for research in researches %}
+                    <option value="{{ research.pk }}" {% if selected_research == research.pk|stringformat:"s" %}selected{% endif %}>
+                        {{ research.title|truncatechars:30 }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label" for="user">Добавил</label>
+            <select id="user" name="user" class="form-select">
+                <option value="">Все</option>
+                {% for user in users %}
+                    <option value="{{ user.pk }}" {% if selected_user == user.pk|stringformat:"s" %}selected{% endif %}>{{ user.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label" for="year">Не раньше года</label>
+            <input id="year" name="year" value="{{ min_year }}" class="form-control">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label" for="sort">Сортировка</label>
+            <select id="sort" name="sort" class="form-select">
+                <option value="new" {% if sort == "new" %}selected{% endif %}>Сначала новые</option>
+                <option value="old" {% if sort == "old" %}selected{% endif %}>Сначала старые</option>
+                <option value="author" {% if sort == "author" %}selected{% endif %}>По автору</option>
+                <option value="research" {% if sort == "research" %}selected{% endif %}>По исследованию</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="fresh" name="fresh" value="1" {% if only_fresh %}checked{% endif %}>
+                <label class="form-check-label" for="fresh">Без устаревших</label>
+            </div>
+            <button class="btn btn-primary">Показать</button>
+            <a href="{% url 'sources:list' %}" class="btn btn-outline-secondary">Сбросить</a>
+        </div>
+    </form>
+    {% if error %}<p class="text-danger">{{ error }}</p>{% endif %}
+    <p class="text-muted">Найдено: {{ total }}</p>
+    <ul class="list-group mb-3">
         {% for source in sources %}
             {% include "sources/includes/source_item.html" %}
         {% empty %}
-            <li class="list-group-item">Источников пока нет</li>
+            <li class="list-group-item">Источников не найдено</li>
         {% endfor %}
     </ul>
+    {% include "includes/pagination.html" %}
 {% endblock %}
