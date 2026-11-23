@@ -5,7 +5,7 @@
 {% block content %}
     <h1>{{ research.title }}</h1>
     <p class="lead">{{ research.description }}</p>
-    <p>Автор: <a href="{% url 'users:detail' research.user.id %}">{{ research.user.name }}</a></p>
+    <p>Автор: <a href="{% url 'users:detail' research.user_id %}">{{ research.user_name }}</a></p>
     {% if stats.count %}
         <div class="row mb-4">
             <div class="col-md-3"><div class="stat-card">Источников: <b>{{ stats.count }}</b></div></div>

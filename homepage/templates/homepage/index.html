@@ -8,11 +8,12 @@
         Учёт источников литературы для научных и учебных исследований.
     </p>
     <div class="row mb-4">
-        <div class="col-md-4"><div class="stat-card">Пользователей: <b>{{ users_count }}</b></div></div>
-        <div class="col-md-4"><div class="stat-card">Исследований: <b>{{ researches_count }}</b></div></div>
-        <div class="col-md-4"><div class="stat-card">Источников: <b>{{ sources_count }}</b></div></div>
+        <div class="col-md-4"><div class="stat-card">Пользователей: <b>{{ counts.users_count }}</b></div></div>
+        <div class="col-md-4"><div class="stat-card">Исследований: <b>{{ counts.researches_count }}</b></div></div>
+        <div class="col-md-4"><div class="stat-card">Источников: <b>{{ counts.sources_count }}</b></div></div>
     </div>
     <a href="{% url 'researches:list' %}" class="btn btn-primary me-2">Исследования</a>
     <a href="{% url 'sources:list' %}" class="btn btn-secondary me-2">Источники</a>
-    <a href="{% url 'users:list' %}" class="btn btn-outline-secondary">Пользователи</a>
+    <a href="{% url 'users:list' %}" class="btn btn-outline-secondary me-2">Пользователи</a>
+    <a href="{% url 'homepage:statistics' %}" class="btn btn-outline-primary">Статистика</a>
 {% endblock %}

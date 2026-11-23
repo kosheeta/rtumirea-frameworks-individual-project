@@ -7,19 +7,19 @@
         <div class="card-body">
             <h5 class="card-title">{{ source.title }}</h5>
             <p class="card-text"><strong>Автор:</strong> {{ source.author }}</p>
-            <p class="card-text"><strong>Год:</strong> {{ source.year }} ({{ source.get_age }} лет)</p>
-            <p class="card-text"><strong>Ссылка:</strong> {{ source.url|urlize }}</p>
+            <p class="card-text"><strong>Год:</strong> {{ source.year }} ({{ source.age }} лет)</p>
+            <p class="card-text"><strong>Ссылка:</strong> {{ source.url|default:"нет"|urlize }}</p>
             <p class="card-text"><strong>Исследование:</strong>
-                <a href="{% url 'researches:detail' source.research.id %}">{{ source.research.title }}</a>
+                <a href="{% url 'researches:detail' source.research_id %}">{{ source.research_title }}</a>
             </p>
             <p class="card-text"><strong>Добавил:</strong>
-                <a href="{% url 'users:detail' source.user.id %}">{{ source.user.name }}</a>
+                <a href="{% url 'users:detail' source.user_id %}">{{ source.user_name }}</a>
             </p>
             <p class="card-text">Актуальность:
-                {% include "sources/includes/relevance_badge.html" with relevance=source.get_relevance %}
+                {% include "sources/includes/relevance_badge.html" with relevance=source.relevance %}
             </p>
             <p class="card-text"><strong>Библиографическая запись:</strong>
-                {{ source.format_citation }}
+                {{ source.author }} {{ source.title }} ({{ source.year }}). {{ source.url }}
             </p>
             <a href="{% url 'sources:list' %}" class="btn btn-outline-secondary">← к источникам</a>
         </div>

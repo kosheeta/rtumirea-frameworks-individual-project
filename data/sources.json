@@ -25,5 +25,68 @@
     "title": "Разработка веб-приложений на Django",
     "year": 2024,
     "url": "https://example.org/books/django"
+  },
+  {
+    "id": 4,
+    "research_id": 1,
+    "user_id": 1,
+    "author": "Кузнецов В. В.",
+    "title": "Статистика для аналитиков",
+    "year": 2019,
+    "url": "https://example.org/books/statistics"
+  },
+  {
+    "id": 5,
+    "research_id": 2,
+    "user_id": 2,
+    "author": "Орлов Д. С.",
+    "title": "Flask: микрофреймворк для веба",
+    "year": 2021,
+    "url": "https://example.org/books/flask"
+  },
+  {
+    "id": 6,
+    "research_id": 3,
+    "user_id": 1,
+    "author": "Лебедев К. М.",
+    "title": "Глубокое обучение",
+    "year": 2018,
+    "url": "https://example.org/books/deep-learning"
+  },
+  {
+    "id": 7,
+    "research_id": 3,
+    "user_id": 3,
+    "author": "Морозова Е. А.",
+    "title": "Нейросети в диагностике заболеваний",
+    "year": 2025,
+    "url": "https://example.org/articles/med-nn"
+  },
+  {
+    "id": 8,
+    "research_id": 4,
+    "user_id": 3,
+    "author": "Волков Р. Н.",
+    "title": "Уязвимости веб-приложений",
+    "year": 2023,
+    "url": "https://example.org/articles/owasp"
+  },
+  {
+    "id": 9,
+    "research_id": 4,
+    "user_id": 3,
+    "author": "Фёдоров А. И.",
+    "title": "Основы криптографии",
+    "year": 2012,
+    "url": "https://example.org/books/crypto"
+  },
+  {
+    "id": 10,
+    "research_id": 2,
+    "user_id": 2,
+    "author": "Сидоров П. П.",
+    "title": "Тестирование Django-проектов",
+    "year": 2025,
+    "url": "https://example.org/articles/django-tests"
   }
 ]

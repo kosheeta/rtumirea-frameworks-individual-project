@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Статистика{% endblock %}
+
+{% block content %}
+    <h1>Статистика</h1>
+    <div class="row mb-4">
+        <div class="col-md-3"><div class="stat-card">Источников: <b>{{ totals.sources_count }}</b></div></div>
+        <div class="col-md-3"><div class="stat-card">Средний год: <b>{{ totals.average_year|default:"—" }}</b></div></div>
+        <div class="col-md-3"><div class="stat-card">Самый старый: <b>{{ totals.oldest_year|default:"—" }}</b></div></div>
+        <div class="col-md-3"><div class="stat-card">Самый новый: <b>{{ totals.newest_year|default:"—" }}</b></div></div>
+    </div>
+
+    <h4>Источники по исследованиям</h4>
+    <table class="table table-sm bg-white">
+        <thead><tr><th>Исследование</th><th>Источников</th><th>Средний год</th></tr></thead>
+        <tbody>
+            {% for row in by_research %}
+                <tr>
+                    <td><a href="{% url 'researches:detail' row.id %}">{{ row.title }}</a></td>
+                    <td>{{ row.sources_count }}</td>
+                    <td>{{ row.average_year|default:"—" }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h4>Актуальность источников</h4>
+    <ul class="list-group mb-4">
+        {% for row in by_relevance %}
+            <li class="list-group-item d-flex justify-content-between">
+                {% include "sources/includes/relevance_badge.html" with relevance=row.relevance %}
+                <span>{{ row.sources_count }}</span>
+            </li>
+        {% empty %}
+            <li class="list-group-item">Источников пока нет</li>
+        {% endfor %}
+    </ul>
+
+    <h4>Исследования со средним годом источников раньше 2020</h4>
+    <ul class="list-group">
+        {% for row in old_researches %}
+            <li class="list-group-item">
+                <a href="{% url 'researches:detail' row.id %}">{{ row.title }}</a> — {{ row.average_year }}
+            </li>
+        {% empty %}
+            <li class="list-group-item">Таких исследований нет</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

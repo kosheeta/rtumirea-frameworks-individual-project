@@ -13,6 +13,8 @@
                href="{% url 'sources:list' %}">Источники</a>
             <a class="nav-link {% if url_name == 'users' %}active{% endif %}"
                href="{% url 'users:list' %}">Пользователи</a>
+            <a class="nav-link {% if request.resolver_match.url_name == 'statistics' %}active{% endif %}"
+               href="{% url 'homepage:statistics' %}">Статистика</a>
         </div>
     </div>
 </nav>

@@ -8,7 +8,7 @@
         {% for user in users %}
             <li class="list-group-item d-flex justify-content-between">
                 <a href="{% url 'users:detail' user.id %}">{{ user.name }}</a>
-                <span class="text-muted">{{ user.email|lower }}</span>
+                <span class="text-muted">{{ user.email|lower }} · исследований: {{ user.researches_count }}, источников: {{ user.sources_count }}</span>
             </li>
         {% empty %}
             <li class="list-group-item">Пользователей пока нет</li>

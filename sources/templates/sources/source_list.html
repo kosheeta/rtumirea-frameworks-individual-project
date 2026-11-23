@@ -3,7 +3,10 @@
 {% block title %}Источники{% endblock %}
 
 {% block content %}
-    <h1>Источники</h1>
+    <div class="d-flex justify-content-between align-items-center">
+        <h1>Источники</h1>
+        <a href="{% url 'sources:search' %}" class="btn btn-outline-primary">Поиск источников</a>
+    </div>
     <p class="text-muted">Всего: {{ sources|length }}</p>
     <input id="list-filter" class="form-control mb-3" placeholder="Фильтр по автору или названию">
     <ul class="list-group">

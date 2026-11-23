@@ -2,5 +2,5 @@
     <a href="{% url 'sources:detail' source.id %}">
         {{ source.author }} – {{ source.title|truncatechars:60 }} ({{ source.year }})
     </a>
-    {% include "sources/includes/relevance_badge.html" with relevance=source.get_relevance %}
+    {% include "sources/includes/relevance_badge.html" with relevance=source.relevance %}
 </li>

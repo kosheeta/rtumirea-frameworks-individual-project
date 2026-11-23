@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Поиск источников{% endblock %}
+
+{% block content %}
+    <h1>Поиск источников</h1>
+    <form method="get" class="row g-2 mb-4">
+        <div class="col-md-6">
+            <input name="q" value="{{ query }}" class="form-control" placeholder="Автор или название">
+        </div>
+        <div class="col-md-3">
+            <input name="year" value="{{ min_year }}" type="number" class="form-control" placeholder="Не раньше года">
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-primary w-100">Найти</button>
+        </div>
+    </form>
+    {% if searched %}
+        <p class="text-muted">Найдено: {{ sources|length }}</p>
+        <ul class="list-group">
+            {% for source in sources %}
+                {% include "sources/includes/source_item.html" %}
+            {% empty %}
+                <li class="list-group-item">Ничего не найдено</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <a href="{% url 'sources:list' %}" class="btn btn-outline-secondary mt-3">← к источникам</a>
+{% endblock %}

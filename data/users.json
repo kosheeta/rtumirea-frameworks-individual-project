@@ -8,5 +8,10 @@
     "id": 2,
     "name": "Петров Иван",
     "email": "petrov@example.com"
+  },
+  {
+    "id": 3,
+    "name": "Соколова Мария",
+    "email": "sokolova@example.com"
   }
 ]
