@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Источники{% endblock %}
+
+{% block content %}
+    <h1>Источники</h1>
+    <p class="text-muted">Всего: {{ sources|length }}</p>
+    <input id="list-filter" class="form-control mb-3" placeholder="Фильтр по автору или названию">
+    <ul class="list-group">
+        {% for source in sources %}
+            {% include "sources/includes/source_item.html" %}
+        {% empty %}
+            <li class="list-group-item">Источников пока нет</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

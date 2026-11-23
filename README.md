@@ -118,8 +118,35 @@ Source
 
 Если объект с указанным id не найден, возвращается страница с кодом 404.
 Для неизвестных адресов используется собственный обработчик `handler404`.
-Общий каркас страниц (Bootstrap, навигация) формирует функция
-`homepage.views.page()`.
+
+## Шаблоны и статические файлы
+
+View-функции готовят контекст и вызывают `render()`, HTML формируется
+в шаблонах Django:
+
+- `templates/base.html` — базовый шаблон: Bootstrap, свой CSS,
+  навигация, блоки `title` и `content`, подвал, подключение JavaScript;
+- `templates/includes/navigation.html` — меню, ссылки через
+  `{% url %}`, подсветка текущего раздела;
+- `homepage/templates/homepage/` — главная страница и страница 404;
+- `researches/templates/researches/` — список и страница исследования,
+  `includes/research_card.html` — карточка исследования;
+- `sources/templates/sources/` — список и страница источника,
+  `includes/source_item.html` и `includes/relevance_badge.html` —
+  строка источника и бейдж актуальности;
+- `users/templates/users/` — список и страница пользователя.
+
+У каждого приложения своё пространство имён URL (`app_name`), ссылки
+в шаблонах строятся по именам: `{% url 'sources:detail' source.id %}`.
+
+В шаблонах используются циклы `{% for %}` с `{% empty %}`, условия
+`{% if %}`, `{% include %}` с параметрами и фильтры `length`,
+`truncatechars`, `truncatewords`, `floatformat`, `urlize`, `lower`,
+`default`.
+
+Статические файлы лежат в `homepage/static/homepage/`: `css/style.css`
+(собственные стили карточек и бейджей), `js/main.js` (фильтр списка на
+странице без перезагрузки), `img/logo.svg` (логотип).
 
 Данные для страниц загружаются из JSON функцией `storage.load_all()`,
 то есть веб-часть использует классы и функции из ПР3. Добавление,
@@ -130,9 +157,11 @@ Source
 
 - `manage.py` — утилита управления Django-проектом;
 - `sourcehub/` — настройки Django-проекта (`settings.py`, `urls.py`);
-- `homepage/` — главная страница, каркас страниц, обработчик 404;
+- `templates/` — базовый шаблон и общие фрагменты;
+- `homepage/` — главная страница, обработчик 404, статические файлы;
 - `researches/`, `sources/`, `users/` — Django-приложения со страницами
-  исследований, источников и пользователей (`views.py`, `urls.py`);
+  исследований, источников и пользователей (`views.py`, `urls.py`,
+  `templates/`);
 - `main.py` — консольная версия: меню и пользовательские сценарии;
 - `models/users.py` — класс `User` и функции работы с пользователями;
 - `models/researches.py` — класс `Research` и функции работы

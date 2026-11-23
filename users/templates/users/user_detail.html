@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user_obj.name }}{% endblock %}
+
+{% block content %}
+    <h1>{{ user_obj.name }}</h1>
+    <p>Email: {{ user_obj.email }}</p>
+    <p>Добавлено источников: {{ sources_count }}</p>
+    <h4>Исследования</h4>
+    <ul class="list-group mb-3">
+        {% for research in researches %}
+            <li class="list-group-item">
+                {{ forloop.counter }}.
+                <a href="{% url 'researches:detail' research.id %}">{{ research.title }}</a>
+            </li>
+        {% empty %}
+            <li class="list-group-item">Исследований пока нет</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'users:list' %}" class="btn btn-outline-secondary">← к пользователям</a>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Пользователи{% endblock %}
+
+{% block content %}
+    <h1>Пользователи</h1>
+    <ul class="list-group">
+        {% for user in users %}
+            <li class="list-group-item d-flex justify-content-between">
+                <a href="{% url 'users:detail' user.id %}">{{ user.name }}</a>
+                <span class="text-muted">{{ user.email|lower }}</span>
+            </li>
+        {% empty %}
+            <li class="list-group-item">Пользователей пока нет</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

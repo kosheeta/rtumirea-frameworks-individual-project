@@ -1,0 +1,19 @@
+{% load static %}
+{% with url_name=request.resolver_match.app_name %}
+<nav class="navbar navbar-expand bg-body-tertiary mb-4">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'homepage:index' %}">
+            <img src="{% static 'homepage/img/logo.svg' %}" alt="логотип" width="28" height="28" class="me-2">
+            Источники
+        </a>
+        <div class="navbar-nav">
+            <a class="nav-link {% if url_name == 'researches' %}active{% endif %}"
+               href="{% url 'researches:list' %}">Исследования</a>
+            <a class="nav-link {% if url_name == 'sources' %}active{% endif %}"
+               href="{% url 'sources:list' %}">Источники</a>
+            <a class="nav-link {% if url_name == 'users' %}active{% endif %}"
+               href="{% url 'users:list' %}">Пользователи</a>
+        </div>
+    </div>
+</nav>
+{% endwith %}

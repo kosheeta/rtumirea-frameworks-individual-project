@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}404 – страница не найдена{% endblock %}
+
+{% block content %}
+    <h1 class="text-danger">{{ title|default:"404 – страница не найдена" }}</h1>
+    <p>Проверьте адрес или вернитесь назад.</p>
+    {% if back_url %}
+        <a href="{{ back_url }}" class="btn btn-outline-secondary">← {{ back_text }}</a>
+    {% else %}
+        <a href="{% url 'homepage:index' %}" class="btn btn-primary">На главную</a>
+    {% endif %}
+{% endblock %}

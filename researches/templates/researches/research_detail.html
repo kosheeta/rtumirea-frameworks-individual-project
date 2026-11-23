@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}{{ research.title }}{% endblock %}
+
+{% block content %}
+    <h1>{{ research.title }}</h1>
+    <p class="lead">{{ research.description }}</p>
+    <p>Автор: <a href="{% url 'users:detail' research.user.id %}">{{ research.user.name }}</a></p>
+    {% if stats.count %}
+        <div class="row mb-4">
+            <div class="col-md-3"><div class="stat-card">Источников: <b>{{ stats.count }}</b></div></div>
+            <div class="col-md-3"><div class="stat-card">Средний год: <b>{{ stats.average_year|floatformat:0 }}</b></div></div>
+            <div class="col-md-3"><div class="stat-card">Актуальных: <b>{{ stats.actual_count }}</b></div></div>
+            <div class="col-md-3"><div class="stat-card">Устаревших: <b>{{ stats.outdated_count }}</b></div></div>
+        </div>
+    {% endif %}
+    <h4>Источники</h4>
+    <ul class="list-group mb-3">
+        {% for source in sources %}
+            {% include "sources/includes/source_item.html" %}
+        {% empty %}
+            <li class="list-group-item">Источников пока нет</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'researches:list' %}" class="btn btn-outline-secondary">← к исследованиям</a>
+{% endblock %}

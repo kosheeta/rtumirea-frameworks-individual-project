@@ -1,0 +1,11 @@
+<div class="col-md-6 mb-3" data-filter-item>
+    <div class="card h-100">
+        <div class="card-body">
+            <h5 class="card-title">
+                <a href="{% url 'researches:detail' research.id %}">{{ research.title }}</a>
+            </h5>
+            <p class="card-text">{{ research.description|truncatewords:12 }}</p>
+            <p class="card-text text-muted small">{{ research.user.name }}</p>
+        </div>
+    </div>
+</div>

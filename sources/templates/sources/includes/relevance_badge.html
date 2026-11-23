@@ -1,0 +1,7 @@
+{% if relevance == "актуальный" %}
+    <span class="badge relevance-actual">{{ relevance }}</span>
+{% elif relevance == "требует проверки" %}
+    <span class="badge relevance-check">{{ relevance }}</span>
+{% else %}
+    <span class="badge relevance-old">{{ relevance }}</span>
+{% endif %}

@@ -1,0 +1,6 @@
+<li class="list-group-item d-flex justify-content-between align-items-center" data-filter-item>
+    <a href="{% url 'sources:detail' source.id %}">
+        {{ source.author }} – {{ source.title|truncatechars:60 }} ({{ source.year }})
+    </a>
+    {% include "sources/includes/relevance_badge.html" with relevance=source.get_relevance %}
+</li>

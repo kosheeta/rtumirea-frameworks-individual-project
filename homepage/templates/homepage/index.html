@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Главная – Сервис учёта источников{% endblock %}
+
+{% block content %}
+    <h1 class="display-5">Сервис учёта использованных источников</h1>
+    <p class="lead">
+        Учёт источников литературы для научных и учебных исследований.
+    </p>
+    <div class="row mb-4">
+        <div class="col-md-4"><div class="stat-card">Пользователей: <b>{{ users_count }}</b></div></div>
+        <div class="col-md-4"><div class="stat-card">Исследований: <b>{{ researches_count }}</b></div></div>
+        <div class="col-md-4"><div class="stat-card">Источников: <b>{{ sources_count }}</b></div></div>
+    </div>
+    <a href="{% url 'researches:list' %}" class="btn btn-primary me-2">Исследования</a>
+    <a href="{% url 'sources:list' %}" class="btn btn-secondary me-2">Источники</a>
+    <a href="{% url 'users:list' %}" class="btn btn-outline-secondary">Пользователи</a>
+{% endblock %}
