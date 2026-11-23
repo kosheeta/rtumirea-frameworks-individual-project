@@ -11,7 +11,7 @@
         {% for research in researches %}
             <li class="list-group-item">
                 {{ forloop.counter }}.
-                <a href="{% url 'researches:detail' research.id %}">{{ research.title }}</a>
+                <a href="{{ research.get_absolute_url }}">{{ research.title }}</a>
             </li>
         {% empty %}
             <li class="list-group-item">Исследований пока нет</li>

@@ -1,6 +1,6 @@
 from datetime import date
 
-from django.db.models import Avg, Case, Count, Max, Min, Value, When
+from django.db.models import Avg, Case, Count, F, Max, Min, Q, Value, When
 from django.shortcuts import render
 
 from researches.models import Research
@@ -19,7 +19,12 @@ def index(request):
         "researches_count": Research.objects.count(),
         "sources_count": Source.objects.count(),
     }
-    latest = Source.objects.select_related("research")[:3]
+    # только нужные поля, название исследования берём через F
+    latest = (
+        Source.objects.not_excluded()
+        .annotate(research_title=F("research__title"))
+        .values("id", "author", "title", "year", "research_title")[:3]
+    )
     return render(
         request, "homepage/index.html", {"counts": counts, "latest": latest}
     )
@@ -29,16 +34,22 @@ def statistics(request):
     year = date.today().year
     totals = Source.objects.aggregate(
         sources_count=Count("id"),
+        new_count=Count("id", filter=Q(status=Source.Status.NEW)),
+        checked_count=Count("id", filter=Q(status=Source.Status.CHECKED)),
+        excluded_count=Count("id", filter=Q(status=Source.Status.EXCLUDED)),
         average_year=Avg("year"),
         oldest_year=Min("year"),
         newest_year=Max("year"),
     )
     by_research = Research.objects.annotate(
-        sources_count=Count("sources"),
+        sources_count=Count(
+            "sources",
+            filter=~Q(sources__status=Source.Status.EXCLUDED),
+        ),
         average_year=Avg("sources__year"),
     ).order_by("-sources_count", "title")
     by_relevance = (
-        Source.objects.annotate(
+        Source.objects.not_excluded().annotate(
             relevance=Case(
                 When(year__gte=year - 3, then=Value("актуальный")),
                 When(year__gte=year - 7, then=Value("требует проверки")),

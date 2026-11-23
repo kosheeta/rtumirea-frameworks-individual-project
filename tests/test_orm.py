@@ -45,14 +45,13 @@ def test_search_ignores_case(data):
 
 def test_pages(client, data):
     """Основные страницы открываются, несуществующий объект даёт 404"""
-    research_id = data["research"].id
     assert client.get(reverse("homepage:index")).status_code == 200
     assert client.get(reverse("homepage:statistics")).status_code == 200
     assert client.get(
-        reverse("researches:detail", args=[research_id])
+        data["research"].get_absolute_url()
     ).status_code == 200
     assert client.get(
-        reverse("researches:detail", args=[999])
+        reverse("researches:detail", args=["net-takogo"])
     ).status_code == 404
 
 
@@ -64,3 +63,49 @@ def test_sources_filter_and_sort(client, data):
     assert response.context["error"]
     response = client.get(reverse("sources:list"), {"sort": "bad"})
     assert response.status_code == 200
+
+
+def test_slug_from_title(data):
+    """Slug создаётся латиницей из названия и не повторяется"""
+    assert data["research"].slug == "analiz-dannyh"
+    second = Research.objects.create(user=data["ivan"], title="Анализ данных")
+    assert second.slug == "analiz-dannyh-2"
+
+
+def test_queryset_methods(data):
+    """Методы менеджера и вычисляемое поле"""
+    assert Source.objects.fresh().count() == 1
+    assert Source.objects.outdated().count() == 1
+    source = Source.objects.get(year=2022)
+    assert source.short_name == "Иванов И. И., 2022"
+    source.status = Source.Status.EXCLUDED
+    source.save()
+    assert Source.objects.not_excluded().count() == 1
+
+
+def test_statistics_by_status(client, data):
+    """Статистика учитывает статусы источников"""
+    Source.objects.filter(year=2010).update(status=Source.Status.CHECKED)
+    totals = client.get(reverse("homepage:statistics")).context["totals"]
+    assert totals["checked_count"] == 1
+    assert totals["new_count"] == 1
+
+
+def test_admin_pages(admin_client, data):
+    """Страницы админки открываются, поиск работает"""
+    for name in ("users_user", "researches_research", "sources_source"):
+        url = reverse(f"admin:{name}_changelist")
+        assert admin_client.get(url).status_code == 200
+    url = reverse("admin:sources_source_changelist")
+    response = admin_client.get(url, {"q": "методы"})
+    assert response.context["cl"].result_count == 1
+
+
+def test_admin_action(admin_client, data):
+    """Массовое действие меняет статус"""
+    ids = list(Source.objects.values_list("id", flat=True))
+    admin_client.post(
+        reverse("admin:sources_source_changelist"),
+        {"action": "mark_checked", "_selected_action": ids},
+    )
+    assert Source.objects.filter(status=Source.Status.CHECKED).count() == 2

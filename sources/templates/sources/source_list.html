@@ -8,7 +8,7 @@
         <a href="{% url 'sources:search' %}" class="btn btn-outline-primary">Поиск источников</a>
     </div>
     <form method="get" class="row g-2 align-items-end mb-3">
-        <div class="col-md-3">
+        <div class="col-md-2">
             <label class="form-label" for="research">Исследование</label>
             <select id="research" name="research" class="form-select">
                 <option value="">Все</option>
@@ -29,7 +29,16 @@
             </select>
         </div>
         <div class="col-md-2">
-            <label class="form-label" for="year">Не раньше года</label>
+            <label class="form-label" for="status">Статус</label>
+            <select id="status" name="status" class="form-select">
+                <option value="">Все</option>
+                {% for value, label in statuses %}
+                    <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-1">
+            <label class="form-label" for="year">С года</label>
             <input id="year" name="year" value="{{ min_year }}" class="form-control">
         </div>
         <div class="col-md-2">

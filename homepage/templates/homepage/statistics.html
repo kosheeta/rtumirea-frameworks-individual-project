@@ -11,13 +11,20 @@
         <div class="col-md-3"><div class="stat-card">Самый новый: <b>{{ totals.newest_year|default:"—" }}</b></div></div>
     </div>
 
-    <h4>Источники по исследованиям</h4>
+    <h4>Статусы источников</h4>
+    <div class="row mb-4">
+        <div class="col-md-4"><div class="stat-card">Новых: <b>{{ totals.new_count }}</b></div></div>
+        <div class="col-md-4"><div class="stat-card">Проверенных: <b>{{ totals.checked_count }}</b></div></div>
+        <div class="col-md-4"><div class="stat-card">Исключённых: <b>{{ totals.excluded_count }}</b></div></div>
+    </div>
+
+    <h4>Источники по исследованиям (без исключённых)</h4>
     <table class="table table-sm bg-white">
         <thead><tr><th>Исследование</th><th>Источников</th><th>Средний год</th></tr></thead>
         <tbody>
             {% for row in by_research %}
                 <tr>
-                    <td><a href="{% url 'researches:detail' row.id %}">{{ row.title }}</a></td>
+                    <td><a href="{{ row.get_absolute_url }}">{{ row.title }}</a></td>
                     <td>{{ row.sources_count }}</td>
                     <td>{{ row.average_year|floatformat:1|default:"—" }}</td>
                 </tr>
@@ -41,7 +48,7 @@
     <ul class="list-group">
         {% for row in old_researches %}
             <li class="list-group-item">
-                <a href="{% url 'researches:detail' row.id %}">{{ row.title }}</a> — {{ row.average_year|floatformat:1 }}
+                <a href="{{ row.get_absolute_url }}">{{ row.title }}</a> — {{ row.average_year|floatformat:1 }}
             </li>
         {% empty %}
             <li class="list-group-item">Таких исследований нет</li>

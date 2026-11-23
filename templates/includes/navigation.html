@@ -8,9 +8,9 @@
         </a>
         <div class="navbar-nav">
             <a class="nav-link {% if url_name == 'researches' %}active{% endif %}"
-               href="{% url 'researches:list' %}">Исследования</a>
+               href="{% url 'researches:list' %}">Исследования <span class="badge bg-secondary">{{ nav_researches_count }}</span></a>
             <a class="nav-link {% if url_name == 'sources' %}active{% endif %}"
-               href="{% url 'sources:list' %}">Источники</a>
+               href="{% url 'sources:list' %}">Источники <span class="badge bg-secondary">{{ nav_sources_count }}</span></a>
             <a class="nav-link {% if url_name == 'users' %}active{% endif %}"
                href="{% url 'users:list' %}">Пользователи</a>
             <a class="nav-link {% if request.resolver_match.url_name == 'statistics' %}active{% endif %}"

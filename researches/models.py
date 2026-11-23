@@ -1,6 +1,9 @@
 from django.db import models
+from django.urls import reverse
 
 from users.models import User
+
+from .utils import make_slug
 
 
 class Research(models.Model):
@@ -11,10 +14,33 @@ class Research(models.Model):
         verbose_name="Владелец",
     )
     title = models.CharField(max_length=300, verbose_name="Название")
+    slug = models.SlugField(
+        max_length=60,
+        unique=True,
+        blank=True,
+        verbose_name="Адрес (slug)",
+        help_text="Латиницей, если не заполнить — создаётся из названия",
+    )
     description = models.TextField(blank=True, verbose_name="Описание")
 
     def belongs_to(self, user):
         return self.user_id == user.id
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base = make_slug(self.title) or "research"
+            slug = base
+            number = 2
+            while Research.objects.filter(slug=slug).exclude(
+                pk=self.pk
+            ).exists():
+                slug = f"{base}-{number}"
+                number += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse("researches:detail", args=[self.slug])
 
     def __str__(self):
         return self.title

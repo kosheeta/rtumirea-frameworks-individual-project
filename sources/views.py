@@ -22,10 +22,13 @@ def sources_list(request):
     user_id = request.GET.get("user", "").strip()
     min_year = request.GET.get("year", "").strip()
     only_fresh = request.GET.get("fresh") == "1"
+    status = request.GET.get("status", "").strip()
     sort = request.GET.get("sort", "new")
     error = None
 
-    sources = Source.objects.select_related("research", "user")
+    sources = Source.objects.with_related()
+    if status in Source.Status.values:
+        sources = sources.filter(status=status)
     if research_id.isdigit():
         sources = sources.filter(research_id=int(research_id))
     if user_id.isdigit():
@@ -37,7 +40,7 @@ def sources_list(request):
             error = "Год должен быть числом"
     if only_fresh:
         # убираем устаревшие источники (старше 7 лет)
-        sources = sources.exclude(year__lt=Source.fresh_border_year())
+        sources = sources.fresh()
     sources = sources.order_by(*SORT_FIELDS.get(sort, SORT_FIELDS["new"]))
 
     page_obj = Paginator(sources, 5).get_page(request.GET.get("page"))
@@ -54,6 +57,8 @@ def sources_list(request):
         "min_year": min_year,
         "only_fresh": only_fresh,
         "sort": sort,
+        "statuses": Source.Status.choices,
+        "selected_status": status,
         "error": error,
         "query_string": params.urlencode(),
     }
@@ -72,7 +77,7 @@ def sources_search(request):
     if author_start:
         found = Source.objects.filter(author__istartswith=author_start)
         sources = sources & found if query else found
-    sources = sources.select_related("research", "user")
+    sources = sources.with_related()
     context = {
         "sources": sources,
         "query": query,
@@ -84,7 +89,7 @@ def sources_search(request):
 
 def source_detail(request, source_id):
     source = (
-        Source.objects.select_related("research", "user")
+        Source.objects.with_related()
         .filter(pk=source_id)
         .first()
     )

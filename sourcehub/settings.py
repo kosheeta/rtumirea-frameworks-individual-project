@@ -27,6 +27,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
+INTERNAL_IPS = ["127.0.0.1"]
+
 
 # Application definition
 
@@ -53,6 +55,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# debug toolbar нужен только при разработке
+if DEBUG:
+    INSTALLED_APPS += ['debug_toolbar']
+    MIDDLEWARE.insert(1, 'debug_toolbar.middleware.DebugToolbarMiddleware')
+
 ROOT_URLCONF = 'sourcehub.urls'
 
 TEMPLATES = [
@@ -65,6 +72,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'homepage.context_processors.site_counts',
             ],
         },
     },
@@ -124,3 +132,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+FORMS_URLFIELD_ASSUME_HTTPS = True

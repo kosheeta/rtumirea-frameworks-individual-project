@@ -1,6 +1,9 @@
 <li class="list-group-item d-flex justify-content-between align-items-center" data-filter-item>
-    <a href="{% url 'sources:detail' source.id %}">
+    <a href="{{ source.get_absolute_url }}">
         {{ source.author }} – {{ source.title|truncatechars:60 }} ({{ source.year }})
     </a>
-    {% include "sources/includes/relevance_badge.html" with relevance=source.get_relevance %}
+    <span>
+        {% if source.status == "excluded" %}<span class="badge bg-danger">исключён</span>{% elif source.status == "checked" %}<span class="badge bg-info text-dark">проверен</span>{% endif %}
+        {% include "sources/includes/relevance_badge.html" with relevance=source.get_relevance %}
+    </span>
 </li>

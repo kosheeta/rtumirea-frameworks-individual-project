@@ -38,17 +38,15 @@ def researches_list(request):
     return render(request, "researches/research_list.html", context)
 
 
-def research_detail(request, research_id):
+def research_detail(request, slug):
     try:
-        research = Research.objects.select_related("user").get(
-            pk=research_id
-        )
+        research = Research.objects.select_related("user").get(slug=slug)
     except Research.DoesNotExist:
         return not_found(
             request, "Исследование не найдено",
             reverse("researches:list"), "к исследованиям",
         )
-    sources = research.sources.select_related("user")
+    sources = research.sources.not_excluded().select_related("user")
     stats = sources.aggregate(
         count=Count("id"),
         average_year=Avg("year"),
