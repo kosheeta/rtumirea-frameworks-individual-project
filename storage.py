@@ -6,6 +6,11 @@ from models.researches import find_research
 from models.users import find_user_by_id
 
 
+USERS_FILE = "data/users.json"
+RESEARCHES_FILE = "data/researches.json"
+SOURCES_FILE = "data/sources.json"
+
+
 def load_json(filename: str) -> list[dict]:
     """Загрузить список записей из JSON-файла"""
     try:
@@ -96,3 +101,11 @@ def save_sources(filename: str, sources: list[Source]) -> None:
         }
         for source in sources
     ])
+
+
+def load_all() -> tuple[list[User], list[Research], list[Source]]:
+    """Загрузить все данные проекта со связями"""
+    users = load_users(USERS_FILE)
+    researches = load_researches(RESEARCHES_FILE, users)
+    sources = load_sources(SOURCES_FILE, researches, users)
+    return users, researches, sources

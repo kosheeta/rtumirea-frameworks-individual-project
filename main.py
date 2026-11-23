@@ -14,6 +14,9 @@ from models.sources import (
 )
 from models.users import add_user, find_user, find_user_by_id
 from storage import (
+    RESEARCHES_FILE,
+    SOURCES_FILE,
+    USERS_FILE,
     load_researches,
     load_sources,
     load_users,
@@ -22,10 +25,6 @@ from storage import (
     save_users,
 )
 from utils import input_int, input_nonempty
-
-RESEARCHES_FILE = "data/researches.json"
-SOURCES_FILE = "data/sources.json"
-USERS_FILE = "data/users.json"
 
 MENU = """
 === Сервис учёта использованных источников ===

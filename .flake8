@@ -1,3 +1,8 @@
 [flake8]
 extend-ignore = E203
-exclude = .git,__pycache__,.pytest_cache,venv
+exclude = .git,__pycache__,.pytest_cache,venv,migrations
+per-file-ignores =
+    */admin.py:F401
+    */models.py:F401
+    */tests.py:F401
+    sourcehub/settings.py:E501

@@ -80,6 +80,14 @@ def remove_source(sources: list[Source], source_id: int) -> bool:
     return False
 
 
+def find_source(sources: list[Source], source_id: int) -> Source | None:
+    """Найти источник по идентификатору"""
+    for source in sources:
+        if source.id == source_id:
+            return source
+    return None
+
+
 def find_sources(sources: list[Source], query: str) -> list[Source]:
     """Найти источники по подстроке в названии или авторе"""
     query_lower = query.lower()
