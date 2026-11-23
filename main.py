@@ -1,25 +1,25 @@
 """Точка запуска приложения"""
-from researches import (
+from models import Research, Source, User
+from models.researches import (
     add_research,
     find_research,
+    get_user_researches,
+)
+from models.sources import (
+    add_source,
+    find_sources,
     get_research_sources,
     get_research_statistics,
-)
-from sources import (
-    add_source,
-    classify_source_relevance,
-    find_sources,
-    format_citation,
-    get_source_age,
     remove_source,
 )
-from storage import load_json, save_json
-from users import (
-    add_user,
-    find_user,
-    find_users,
-    get_user_researches,
-    is_email_valid,
+from models.users import add_user, find_user, find_user_by_id
+from storage import (
+    load_researches,
+    load_sources,
+    load_users,
+    save_researches,
+    save_sources,
+    save_users,
 )
 from utils import input_int, input_nonempty
 
@@ -45,35 +45,32 @@ MENU = """
 """
 
 
-def show_researches(researches: list[dict]) -> None:
+def show_researches(researches: list[Research]) -> None:
     """Вывести список исследований"""
     if not researches:
         print("Исследования не найдены")
         return
     for research in researches:
-        print(f"[{research['id']}] {research['title']}: "
-              f"{research['description']}")
+        print(f"[{research.id}] {research}")
 
 
-def show_users(users: list[dict]) -> None:
+def show_users(users: list[User]) -> None:
     """Вывести список пользователей"""
     if not users:
         print("Пользователи не найдены")
         return
     for user in users:
-        print(f"[{user['id']}] {user['name']} <{user['email']}>")
+        print(f"[{user.id}] {user}")
 
 
-def show_sources(sources: list[dict]) -> None:
+def show_sources(sources: list[Source]) -> None:
     """Вывести список источников с оценкой актуальности"""
     if not sources:
         print("Источники не найдены")
         return
     for source in sources:
-        age = get_source_age(source["year"])
-        relevance = classify_source_relevance(age)
-        citation = format_citation(source)
-        print(f"[{source['id']}] {citation} — {relevance} ({age} лет)")
+        print(f"[{source.id}] {source} — {source.get_relevance()} "
+              f"({source.get_age()} лет)")
 
 
 def show_statistics(stats: dict) -> None:
@@ -87,11 +84,77 @@ def show_statistics(stats: dict) -> None:
     print(f"Устаревших источников: {stats['outdated_count']}")
 
 
+def ask_user(users: list[User]) -> User | None:
+    """Запросить id пользователя и найти его"""
+    user = find_user_by_id(users, input_int("Идентификатор пользователя: "))
+    if user is None:
+        print("Пользователь с таким идентификатором не найден")
+    return user
+
+
+def ask_research(researches: list[Research]) -> Research | None:
+    """Запросить id исследования и найти его"""
+    research = find_research(
+        researches, input_int("Идентификатор исследования: ")
+    )
+    if research is None:
+        print("Исследование с таким идентификатором не найдено")
+    return research
+
+
+def create_new_research(
+    researches: list[Research], users: list[User]
+) -> None:
+    """Сценарий добавления исследования"""
+    user = ask_user(users)
+    if user is None:
+        return
+    title = input_nonempty("Название исследования: ")
+    description = input_nonempty("Описание: ")
+    research = add_research(researches, user, title, description)
+    save_researches(RESEARCHES_FILE, researches)
+    print(f"Добавлено исследование #{research.id}")
+
+
+def create_new_source(
+    sources: list[Source], researches: list[Research], users: list[User]
+) -> None:
+    """Сценарий добавления источника"""
+    research = ask_research(researches)
+    if research is None:
+        return
+    user = ask_user(users)
+    if user is None:
+        return
+    author = input_nonempty("Автор: ")
+    title = input_nonempty("Название источника: ")
+    year = input_int("Год публикации: ")
+    url = input_nonempty("Ссылка: ")
+    if not Source.is_valid(author, title, year):
+        print("Данные источника неполные")
+        return
+    source = add_source(sources, research, user, author, title, year, url)
+    save_sources(SOURCES_FILE, sources)
+    print(f"Добавлен источник #{source.id}")
+
+
+def create_new_user(users: list[User]) -> None:
+    """Сценарий добавления пользователя"""
+    name = input_nonempty("Имя пользователя: ")
+    email = input_nonempty("Email: ")
+    if not User.is_email_valid(email):
+        print("Некорректный email")
+        return
+    user = add_user(users, name, email)
+    save_users(USERS_FILE, users)
+    print(f"Добавлен пользователь #{user.id}")
+
+
 def main() -> None:
     """Цикл меню приложения"""
-    researches = load_json(RESEARCHES_FILE)
-    sources = load_json(SOURCES_FILE)
-    users = load_json(USERS_FILE)
+    users = load_users(USERS_FILE)
+    researches = load_researches(RESEARCHES_FILE, users)
+    sources = load_sources(SOURCES_FILE, researches, users)
 
     while True:
         print(MENU)
@@ -101,68 +164,40 @@ def main() -> None:
             case "1":
                 show_researches(researches)
             case "2":
-                research_id = input_int("Идентификатор исследования: ")
-                show_sources(get_research_sources(sources, research_id))
+                research = ask_research(researches)
+                if research:
+                    show_sources(get_research_sources(sources, research))
             case "3":
-                user_id = input_int("Идентификатор пользователя: ")
-                if find_user(users, user_id) is None:
-                    print("Пользователь с таким идентификатором не найден")
-                    continue
-                title = input_nonempty("Название исследования: ")
-                description = input_nonempty("Описание: ")
-                research = add_research(
-                    researches, user_id, title, description
-                )
-                save_json(RESEARCHES_FILE, researches)
-                print(f"Добавлено исследование #{research['id']}")
+                create_new_research(researches, users)
             case "4":
-                research_id = input_int("Идентификатор исследования: ")
-                if find_research(researches, research_id) is None:
-                    print("Исследование с таким идентификатором не найдено")
-                    continue
-                user_id = input_int("Идентификатор пользователя: ")
-                if find_user(users, user_id) is None:
-                    print("Пользователь с таким идентификатором не найден")
-                    continue
-                author = input_nonempty("Автор: ")
-                title = input_nonempty("Название источника: ")
-                year = input_int("Год публикации: ")
-                url = input_nonempty("Ссылка: ")
-                source = add_source(
-                    sources, research_id, user_id, author, title, year, url
-                )
-                save_json(SOURCES_FILE, sources)
-                print(f"Добавлен источник #{source['id']}")
+                create_new_source(sources, researches, users)
             case "5":
                 query = input_nonempty("Строка поиска: ")
                 show_sources(find_sources(sources, query))
             case "6":
                 source_id = input_int("Идентификатор источника: ")
                 if remove_source(sources, source_id):
-                    save_json(SOURCES_FILE, sources)
+                    save_sources(SOURCES_FILE, sources)
                     print("Источник удалён")
                 else:
                     print("Источник не найден")
             case "7":
-                research_id = input_int("Идентификатор исследования: ")
-                show_statistics(get_research_statistics(sources, research_id))
+                research = ask_research(researches)
+                if research:
+                    show_statistics(
+                        get_research_statistics(sources, research)
+                    )
             case "8":
                 show_users(users)
             case "9":
-                name = input_nonempty("Имя пользователя: ")
-                email = input_nonempty("Email: ")
-                if not is_email_valid(email):
-                    print("Некорректный email")
-                    continue
-                user = add_user(users, name, email)
-                save_json(USERS_FILE, users)
-                print(f"Добавлен пользователь #{user['id']}")
+                create_new_user(users)
             case "10":
                 query = input_nonempty("Строка поиска: ")
-                show_users(find_users(users, query))
+                show_users(find_user(users, query))
             case "11":
-                user_id = input_int("Идентификатор пользователя: ")
-                show_researches(get_user_researches(researches, user_id))
+                user = ask_user(users)
+                if user:
+                    show_researches(get_user_researches(researches, user))
             case "0":
                 print("Выход из программы")
                 break
