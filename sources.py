@@ -5,6 +5,7 @@ from datetime import date
 def add_source(
     sources: list[dict],
     research_id: int,
+    user_id: int,
     author: str,
     title: str,
     year: int,
@@ -16,6 +17,7 @@ def add_source(
     source = {
         "id": source_id,
         "research_id": research_id,
+        "user_id": user_id,
         "author": author,
         "title": title,
         "year": year,

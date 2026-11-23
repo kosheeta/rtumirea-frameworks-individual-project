@@ -12,7 +12,7 @@ def test_add_source():
     """Добавленный источник появляется в списке с новым id"""
     sources = []
     add_source(
-        sources, 1, "Иванов И. И.", "Методы анализа данных",
+        sources, 1, 1, "Иванов И. И.", "Методы анализа данных",
         2022, "https://example.org"
     )
     assert len(sources) == 1
@@ -23,7 +23,7 @@ def test_find_sources():
     """Поиск находит источник по подстроке и не находит лишнего"""
     sources = []
     add_source(
-        sources, 1, "Иванов И. И.", "Методы анализа данных",
+        sources, 1, 1, "Иванов И. И.", "Методы анализа данных",
         2022, "https://example.org"
     )
     assert len(find_sources(sources, "анализа")) == 1
@@ -34,7 +34,7 @@ def test_remove_source():
     """Удаление по существующему id срабатывает один раз"""
     sources = []
     add_source(
-        sources, 1, "Иванов И. И.", "Методы анализа данных",
+        sources, 1, 1, "Иванов И. И.", "Методы анализа данных",
         2022, "https://example.org"
     )
     assert remove_source(sources, 1) is True

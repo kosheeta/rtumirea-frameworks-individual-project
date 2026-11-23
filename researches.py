@@ -5,7 +5,7 @@ from sources import classify_source_relevance, get_source_age
 
 
 def add_research(
-    researches: list[dict], title: str, description: str
+    researches: list[dict], user_id: int, title: str, description: str
 ) -> dict:
     """Добавить исследование в список researches"""
     research_id = max(
@@ -13,6 +13,7 @@ def add_research(
     ) + 1
     research = {
         "id": research_id,
+        "user_id": user_id,
         "title": title,
         "description": description,
     }

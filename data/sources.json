@@ -2,9 +2,28 @@
   {
     "id": 1,
     "research_id": 1,
+    "user_id": 1,
     "author": "Иванов И. И.",
     "title": "Методы анализа данных",
     "year": 2022,
     "url": "https://example.org/articles/data-analysis"
+  },
+  {
+    "id": 2,
+    "research_id": 1,
+    "user_id": 1,
+    "author": "Смирнов А. А.",
+    "title": "Машинное обучение на практике",
+    "year": 2016,
+    "url": "https://example.org/books/ml-practice"
+  },
+  {
+    "id": 3,
+    "research_id": 2,
+    "user_id": 2,
+    "author": "Сидоров П. П.",
+    "title": "Разработка веб-приложений на Django",
+    "year": 2024,
+    "url": "https://example.org/books/django"
   }
 ]
