@@ -10,5 +10,7 @@ LETTERS = {
 
 
 def make_slug(text):
-    latin = "".join(LETTERS.get(char, char) for char in text.lower())
+    latin = "".join(
+        LETTERS[char] if char in LETTERS else char for char in text.lower()
+    )
     return slugify(latin)[:50]

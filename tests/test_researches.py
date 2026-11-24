@@ -23,6 +23,8 @@ def test_add_and_find_research():
     researches = []
     add_research(researches, anna, "Анализ данных", "Курсовая")
     add_research(researches, ivan, "Django", "Реферат")
-    assert find_research(researches, 2).title == "Django"
+    found = find_research(researches, 2)
+    assert found is not None
+    assert found.title == "Django"
     assert find_research(researches, 3) is None
     assert len(get_user_researches(researches, anna)) == 1

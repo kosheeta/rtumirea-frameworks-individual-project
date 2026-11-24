@@ -1,9 +1,16 @@
+from typing import TYPE_CHECKING
+
 from django.db import models
 from django.urls import reverse
 
 from users.models import User
 
 from .utils import make_slug
+
+if TYPE_CHECKING:
+    from django.db.models.manager import RelatedManager
+
+    from sources.models import Source
 
 
 class Research(models.Model):
@@ -29,6 +36,10 @@ class Research(models.Model):
         help_text="Картинка для страницы исследования, необязательно",
     )
 
+    if TYPE_CHECKING:
+        user_id: int
+        sources: RelatedManager[Source]
+
     def belongs_to(self, user):
         return self.user_id == user.id
 
@@ -48,7 +59,7 @@ class Research(models.Model):
     def get_absolute_url(self):
         return reverse("researches:detail", args=[self.slug])
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.title
 
     class Meta:

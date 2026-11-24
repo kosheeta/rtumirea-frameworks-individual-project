@@ -24,6 +24,7 @@ def test_import_counts(db_path):
         "(SELECT COUNT(*) FROM sources) AS sources_count",
         path=db_path,
     )
+    assert row is not None
     assert row["users_count"] == 3
     assert row["sources_count"] == 10
 

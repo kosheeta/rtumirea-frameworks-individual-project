@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 from homepage.views import not_found
+from sources.models import Source
 from users.models import User
 
 from .forms import ResearchForm
@@ -48,7 +49,8 @@ def research_detail(request, slug):
             request, "Исследование не найдено",
             reverse("researches:list"), "к исследованиям",
         )
-    sources = research.sources.not_excluded().select_related("user")
+    sources = Source.objects.filter(research=research).not_excluded()
+    sources = sources.select_related("user")
     stats = sources.aggregate(
         count=Count("id"),
         average_year=Avg("year"),

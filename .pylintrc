@@ -1,2 +1,15 @@
 [MASTER]
 init-hook='import sys; sys.path.insert(0, ".")'
+ignore=venv,migrations
+load-plugins=pylint_django
+django-settings-module=sourcehub.settings
+
+[MESSAGES CONTROL]
+disable=
+    missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring,
+    redefined-outer-name,
+    unused-argument,
+    too-few-public-methods,
+    too-many-ancestors

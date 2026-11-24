@@ -30,7 +30,7 @@ class SourceFilterForm(forms.Form):
         label="Добавил",
     )
     status = forms.ChoiceField(
-        choices=[("", "Все")] + Source.Status.choices,
+        choices=[("", "Все"), *Source.Status.choices],
         required=False,
         label="Статус",
     )

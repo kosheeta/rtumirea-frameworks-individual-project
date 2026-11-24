@@ -1,4 +1,5 @@
 from datetime import date
+from typing import ClassVar
 
 from django.db import models
 from django.db.models import F, Value
@@ -13,7 +14,7 @@ def fresh_border_year():
     return date.today().year - 7
 
 
-class SourceQuerySet(models.QuerySet):
+class SourceQuerySet(models.QuerySet["Source"]):
     def with_related(self):
         return self.select_related("research", "user")
 
@@ -69,13 +70,17 @@ class Source(models.Model):
         verbose_name="Краткая ссылка",
     )
 
-    objects = SourceQuerySet.as_manager()
+    # as_manager() даёт менеджер с методами SourceQuerySet,
+    # аннотация нужна чтобы ide видела with_related(), fresh() и т.д.
+    objects: ClassVar[SourceQuerySet] = (  # pyright: ignore
+        SourceQuerySet.as_manager()  # pyright: ignore
+    )
 
     @staticmethod
     def fresh_border_year():
         return fresh_border_year()
 
-    def get_age(self):
+    def get_age(self) -> int:
         return date.today().year - self.year
 
     def get_relevance(self):
@@ -92,7 +97,7 @@ class Source(models.Model):
     def get_absolute_url(self):
         return reverse("sources:detail", args=[self.pk])
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.author} – {self.title}"
 
     class Meta:
